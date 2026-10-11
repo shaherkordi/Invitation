@@ -389,7 +389,7 @@
       { transform:T(kEnd,1),  offset:1 }
     ], { duration:dur, fill:'forwards' });
     setTimeout(()=>body.classList.add('doors-open'), dur*.3);
-    lake.animate([{opacity:0},{opacity:1}], { duration:200, delay:dur*.6, fill:'forwards' });
+    lake.animate([{opacity:0},{opacity:1}], { duration:200, delay:dur*.5, fill:'forwards' });
     // paint the view through the doorway with exactly the mapping the full-screen lake uses,
     // so the last frame of the zoom and the lake hero line up pixel for pixel
     const dEl=document.getElementById('doorway');
@@ -398,21 +398,15 @@
     // the scene then cross-fades into the full-screen lake, so there is no hard jump
     dEl.style.backgroundSize='cover';
     dEl.style.backgroundPosition='center';
-    // the front curtains part to the sides instead of fading, so nothing see-through hangs over the doorway
-    const cur=document.getElementById('curtain'), curR=cur.cloneNode();
-    curR.removeAttribute('id'); curR.style.cssText='position:absolute;left:180px;top:430px;width:220px;height:135px;pointer-events:none';
-    cur.after(curR);
-    cur.style.clipPath='inset(0 50% 0 0)'; curR.style.clipPath='inset(0 0 0 50%)';
-    const part=(el,dx)=>el.animate([
-      { transform:'translateX(0)', offset:0 }, { transform:'translateX(0)', offset:.4, easing:'cubic-bezier(.5,0,.3,1)' },
-      { transform:`translateX(${dx}px)`, offset:.75 }, { transform:`translateX(${dx}px)`, offset:1 }
-    ], { duration:dur, fill:'forwards' });
-    part(cur,-75); part(curR,75);
+
+    // once the doors have opened and we are stepping toward the doorway, the whole door scene
+    // dissolves into the full-screen lake (no curtain fades, no growing rectangle)
+    const fadeAt = reduce ? dur*.5 : dur*.58, fadeDur = reduce ? 500 : 1500;
     setTimeout(()=>{
-      body.classList.add('revealed');
-      scene.animate([{opacity:1},{opacity:0}], { duration:700, easing:'ease', fill:'forwards' })
+      scene.animate([{opacity:1},{opacity:0}], { duration:fadeDur, easing:'ease-in-out', fill:'forwards' })
         .onfinish=()=>{ scene.style.display='none'; };
-    }, dur+30);
+      setTimeout(()=>body.classList.add('revealed'), fadeDur*.6);
+    }, fadeAt);
   }
   document.getElementById('openBtn').addEventListener('click', start, { once:true });
 
