@@ -394,16 +394,15 @@
     // so the last frame of the zoom and the lake hero line up pixel for pixel
     const dEl=document.getElementById('doorway');
     const bx=(kEnd*ox + kEnd*s*213.25 + (C.x-kEnd*p.x) - ox)/s, by=(kEnd*oy + kEnd*s*470.5 + (C.y-kEnd*p.y) - oy)/s;
-    // top layer: exact mapping (matches the lake hero at the end of the zoom);
-    // bottom layer: the same view scaled to cover, so tall phones never see the painted doors at the edges
-    const lakeImg=getComputedStyle(dEl).backgroundImage;
-    dEl.style.backgroundImage=`${lakeImg}, ${lakeImg}`;
-    dEl.style.backgroundRepeat='no-repeat, no-repeat';
-    dEl.style.backgroundSize=`${W/kEnd}px ${H/kEnd}px, cover`;
-    dEl.style.backgroundPosition=`${-bx/kEnd}px ${-by/kEnd}px, center`;
+    // the doorway shows the lake scaled to fill it completely (no gaps on any screen shape);
+    // the scene then cross-fades into the full-screen lake, so there is no hard jump
+    dEl.style.backgroundSize='cover';
+    dEl.style.backgroundPosition='center';
     document.getElementById('curtain').animate([{opacity:1},{opacity:1,offset:.7},{opacity:0,offset:.9},{opacity:0}], { duration:dur, fill:'forwards' });
     setTimeout(()=>{
-      scene.style.display='none'; body.classList.add('revealed');
+      body.classList.add('revealed');
+      scene.animate([{opacity:1},{opacity:0}], { duration:700, easing:'ease', fill:'forwards' })
+        .onfinish=()=>{ scene.style.display='none'; };
     }, dur+30);
   }
   document.getElementById('openBtn').addEventListener('click', start, { once:true });
